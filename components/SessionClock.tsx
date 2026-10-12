@@ -18,7 +18,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function SessionClock() {
   const [now, setNow] = useState<Date | null>(null);
+  const [tz, setTz] = useState('');
   useEffect(() => {
+    // read the visitor's zone only in the browser (the server renders in UTC)
+    setTz(Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop()?.replace(/_/g, ' ') || '');
     setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
@@ -29,7 +32,6 @@ export default function SessionClock() {
   const h = Math.floor(diff / 3.6e6), m = Math.floor((diff % 3.6e6) / 6e4), s = Math.floor((diff % 6e4) / 1000);
   const local = open?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const day = open?.toLocaleDateString([], { weekday: 'long' });
-  const tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop()?.replace('_', ' ') : '';
   const syd = open?.toLocaleTimeString('en-AU', { timeZone: 'Australia/Sydney', hour: 'numeric', minute: '2-digit' });
 
   return (
